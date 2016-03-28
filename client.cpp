@@ -62,7 +62,7 @@ int main(int argc , char *argv[])
   std::string request = "GET " + path + " HTTP/1.1\r\n";
   std::string header = "Host: " + host + ":" + port + "\r\n";
   std::string header2 = "User-Agent: martij24-netprog-hw3/1.0\r\n\r\n";
-  std::string combined = request + header + header2;
+  std::cout << request + header + header2 << std::endl;
   if (send(fd, request.c_str(), request.size(), 0) < 0)
     perror("send()");
 
@@ -73,10 +73,9 @@ int main(int argc , char *argv[])
     perror("send()");
   char head[1000];
   bzero(head,1000);
-  std::cout << combined << std::endl;
 
   recv(fd, &head, sizeof(head)-1, 0);
-  std::cout << head << std::endl;
+  fputs(head, stderr);
   std::string data = std::string(head);
   int size_index = data.find("Content-Length: ");
   if (size_index == std::string::npos){
@@ -90,7 +89,8 @@ int main(int argc , char *argv[])
   char content[size];
   bzero(content,size);
   int read = recv(fd, &content, size-1, MSG_WAITALL);
-  std::cout << content << std::endl << "length listed " << size << "size of content "<< read + 1<< std::endl;
+  std::cout.write(content,size) << std::endl;
+  
   close(fd);
 
 }
