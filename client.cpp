@@ -23,7 +23,7 @@ int main(int argc , char *argv[])
   int index = input.find(":",5);
   int index2 = input.find("/",7);
   if (index2 == std::string::npos){
-    index2 = input.length();
+    index2 = input.size();
   }
   if (index == std::string::npos){
     port = "80";
@@ -35,7 +35,7 @@ int main(int argc , char *argv[])
   host = input.substr(7,index - 7);
   std::cout << host << ":" << port << std::endl;
 
-  path = input.substr(index2+1,input.length() - index2 - 1);
+  path = input.substr(index2,input.length() - index2);
 
 
 
@@ -59,5 +59,38 @@ int main(int argc , char *argv[])
   if (connect(fd,res->ai_addr,res->ai_addrlen)==-1) {
       perror("Failed to connect");
   }
+  std::string request = "GET " + path + " HTTP/1.1\r\n";
+  std::string header = "Host: " + host + ":" + port + "\r\n";
+  std::string header2 = "User-Agent: martij24-netprog-hw3/1.0\r\n\r\n";
+  std::string combined = request + header + header2;
+  if (send(fd, request.c_str(), request.size(), 0) < 0)
+    perror("send()");
+
+  if (send(fd, header.c_str(), header.size(), 0) < 0)
+    perror("send()");
+
+  if (send(fd, header2.c_str(), header2.size(), 0) < 0)
+    perror("send()");
+  char head[1000];
+  bzero(head,1000);
+  std::cout << combined << std::endl;
+
+  recv(fd, &head, sizeof(head)-1, 0);
+  std::cout << head << std::endl;
+  std::string data = std::string(head);
+  int size_index = data.find("Content-Length: ");
+  if (size_index == std::string::npos){
+    std::cout << "error: Couldn't find content-length" << std::endl;
+    return 1;
+  }
+  size_index+=16;
+  std::string size_str = data.substr(size_index, data.find("\r",size_index) - size_index);
+  int size = atoi(size_str.c_str());
+
+  char content[size];
+  bzero(content,size);
+  int read = recv(fd, &content, size-1, MSG_WAITALL);
+  std::cout << content << std::endl << "length listed " << size << "size of content "<< read + 1<< std::endl;
+  close(fd);
 
 }

@@ -1,2 +1,2 @@
 Jacob Martin
-My code only support http and not https. Ya dig?
+My code only supports http and not https. Ya dig?
